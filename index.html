@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zenith | Organize Less, Live More</title>
+    <!-- App Config -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#030305">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Floating Ambient Background -->
+        <div class="ambient-glow"></div>
+        <div class="ambient-glow two"></div>
+
+        <!-- Sidebar / Navigation -->
+        <nav class="sidebar glass">
+            <div class="logo">
+                <div class="orb-mini"></div>
+                <span>ZENITH</span>
+            </div>
+
+            <ul class="nav-links">
+                <li class="active" data-view="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Inicio</span>
+                </li>
+                <li data-view="calendar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Calendario</span>
+                </li>
+                <li data-view="logbook">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Logros</span>
+                </li>
+                <li data-view="focus">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Foco Absoluto</span>
+                </li>
+            </ul>
+
+            <div class="install-prompt" id="installPrompt"
+                style="display:none; margin-top: auto; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; text-align: center; cursor: pointer;">
+                <small style="color: var(--accent-blue);">Instalar App</small>
+            </div>
+
+            <div class="user-status glass-blur">
+                <div class="avatar">Yo</div>
+                <div class="status-text">
+                    <span class="name">Mi Vida</span>
+                    <span class="state" id="lifeState">En Orden</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-bar">
+                <div class="greeting">
+                    <h1 id="greetingText">Buenos días.</h1>
+                    <p class="subtitle">Tu vida está al <span class="highlight" id="lifePercentage">100%</span> de
+                        control.</p>
+                </div>
+                <div class="actions">
+                    <!-- <button class="icon-btn theme-toggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button> -->
+                    <button class="btn-primary" id="addEventBtn">+ Nueva Tarea</button>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <div id="viewContainer" class="views">
+
+                <!-- DASHBOARD VIEW -->
+                <div class="view active" id="dashboardView">
+                    <div class="dashboard-grid">
+                        <!-- The Focus Orb -->
+                        <div class="card focus-card glass">
+                            <h2
+                                style="position: absolute; top: 20px; left: 20px; color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px;">
+                                Prioridad #1</h2>
+                            <div class="orb-container">
+                                <div class="orb" id="focusOrb"></div>
+                                <div class="orb-text">
+                                    <span id="currentTask">Pensando...</span>
+                                    <small id="timeLeft" style="display:none">--:--</small>
+                                </div>
+                            </div>
+                            <div class="controls" id="focusControls">
+                                <button class="btn-primary-outline" onclick="app.completeCurrent()">¡Hecho!</button>
+                                <button class="btn-text" onclick="app.deferCurrent()">Más tarde</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stream -->
+                        <div class="card stream-card glass">
+                            <div class="card-header">
+                                <h2>Siguientes Pasos</h2>
+                                <a href="#" onclick="app.switchView('calendar')">Ver Calendario</a>
+                            </div>
+                            <ul class="task-list" id="quickStreamList">
+                                <li class="empty-state">Nada urgente. Disfruta tu tiempo.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Mini Stats -->
+                        <div class="card stats-card glass">
+                            <h2>Progreso Diario</h2>
+                            <div class="stat-row">
+                                <span>Carga Mental</span>
+                                <div class="progress-bar">
+                                    <div class="fill" style="width: 10%"></div>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <span>Completadas Hoy</span>
+                                <span class="number" id="statsCompletedToday">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CALENDAR VIEW -->
+                <div class="view" id="calendarView">
+                    <div class="calendar-header">
+                        <h2 id="currentMonthLabel">Mes Año</h2>
+                        <div class="calendar-nav">
+                            <button class="icon-btn" onclick="app.changeMonth(-1)">
+                                << /button>
+                                    <button class="icon-btn" onclick="app.changeMonth(1)">></button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="calendar-tasks" id="calendarTasksDetails">
+                        <h3>Tareas del día</h3>
+                        <ul id="dayTaskList" class="task-list">
+                            <li class="empty-state">Selecciona un día</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- LOGBOOK (HISTORY) VIEW -->
+                <div class="view" id="logbookView">
+                    <h2>Diario de Logros</h2>
+                    <p class="subtitle" style="margin-bottom: 2rem">Mira todo lo que has conseguido.</p>
+
+                    <div class="history-timeline" id="historyList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- FOCUS VIEW (ZEN MODE) -->
+                <div class="view" id="focusView">
+                    <div class="zen-mode">
+                        <div style="margin-bottom: 2rem; opacity: 0.7">MODO ENFOQUE TOTAL</div>
+                        <h1 id="zenTaskDisplay">Selecciona una tarea</h1>
+
+                        <div class="zen-controls">
+                            <button class="btn-giant" onclick="app.completeCurrent()">TERMINAR TAREA</button>
+                            <br><br>
+                            <button class="btn-text" onclick="app.exitFocus()">Salir del modo enfoque</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Input Modal -->
+        <div class="modal-overlay" id="inputModal">
+            <div class="modal glass">
+                <h2>¿Qué hay que hacer?</h2>
+                <input type="text" id="taskInput" placeholder="Ej: 'Llamar al médico mañana' o 'Comprar pan'"
+                    autocomplete="off">
+                <div class="modal-actions">
+                    <button class="btn-text" onclick="app.closeModal()">Cancelar</button>
+                    <button class="btn-primary" onclick="app.addTask()">Añadir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
